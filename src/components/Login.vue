@@ -1,11 +1,11 @@
 <template>
-    <div class="login" @keyup.65="keyRoute">
+    <div class="login" @keyup.65="keyRoute" v-loading = "loading">
       <img src="./../assets/timg.jpg" width="200" height="200">
       <h1>{{ msg }}</h1>
       <form v-on:submit.prevent="submit">
         <el-row :gutter="20">
           <el-col :span="6" :offset="9">
-            <el-input v-model="username" :class="{ bounceIn: signFailure, 'border-r': signFailure }" placeholder="username" size="small"></el-input>
+            <el-input v-model="username" :class="{ bounceIn: signFailure, 'border-r': signFailure }" placeholder="用户名" size="small"></el-input>
           </el-col>
           <transition appear
                       appear-active-class="animated fadeInRight"
@@ -23,15 +23,15 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="6" :offset="9">
-            <el-input v-model="password" :class="{ bounceIn: signFailure, 'border-r': signFailure }" type="password" placeholder="password" size="small"></el-input>
+            <el-input v-model="password" :class="{ bounceIn: signFailure, 'border-r': signFailure }" type="password" placeholder="输入密码" size="small"></el-input>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="2" :offset="10">
-            <el-button type="success" size="small" native-type="submit" round>sign in</el-button>
+            <el-button type="success" size="small" native-type="submit" round>登录</el-button>
           </el-col>
           <el-col :span="1">
-            <el-button type="info" size="small" native-type="button" @click="openSignUpDialog" round>sign up</el-button>
+            <el-button type="info" size="small" native-type="button" @click="openSignUpDialog" round>注册</el-button>
           </el-col>
         </el-row>
       </form>
@@ -71,16 +71,19 @@ export default {
         password: ''
       },
       signFailure: false,
-      labelWidth: '120px'
+      labelWidth: '120px',
+      loading: false
     }
   },
   methods: {
     submit () {
       this.signFailure = false
+      this.loading = true
       this.axios.post('/api/signIn', {username: this.username, password: this.password}).then(res => {
         this.$store.commit('update', {username: this.username})
         this.$router.push({ path: 'index/charge' })
       }).catch(error => {
+        this.loading = false
         console.log(error)
         this.signFailure = true
       })
@@ -102,7 +105,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   div.login {
-    margin-top: 60px;
+    margin-top: 8rem;
   }
   .el-row {
     margin-bottom: 20px;

@@ -31,8 +31,8 @@
       <el-col :span="12">
         <el-button type="success" icon="el-icon-document" :disabled="isPrepare" size="mini" @click="save" plain>确认收费</el-button>
         <el-button type="info" icon="el-icon-star-on" size="mini" :disabled="isPrepare" @click="tempSave" plain>暫存</el-button>
-        <el-button type="warning" icon="el-icon-delete" size="mini" @click="clear(true)" plain>清屏</el-button>
-        <el-button type="danger" icon="el-icon-remove-outline" size="mini" @click="deleteRow" plain>删除</el-button>
+        <el-button type="warning" icon="el-icon-minus" size="mini" @click="clear(true)" plain>清屏</el-button>
+        <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteRow" plain>删除</el-button>
         <el-button type="primary" plain size="mini" icon="el-icon-printer" :disabled="printable" @click="showPrint">打印发票</el-button>
       </el-col>
     </el-row>
@@ -84,8 +84,8 @@
       </el-header>
       <el-main>
         <transition appear
-                    appear-active-class="animated fadeInRightBig"
-                    name="custom-classes-transition" enter-active-class="animated  fadeInRightBig"
+                    appear-active-class="animated zoomInUp"
+                    name="custom-classes-transition" enter-active-class="animated  zoomInUp"
                     mode="out-in">
           <el-table
             :data="tableData"
@@ -199,7 +199,7 @@
 <script>
 import _ from 'lodash'
 import * as math from 'mathjs'
-var dateFormat = require('dateformat')
+const dateFormat = require('dateformat')
 export default {
   name: 'Charge',
   data () {
@@ -281,10 +281,15 @@ export default {
       handler (newValue, oldValue) {
         _.forEach(newValue, data => {
           this.$set(data, 'amount', math.format(_.multiply(data.price, data.num), 14))
+          if (this.query.contract === '医保') {
+            this.$set(data, 'selfPaying', Number(math.format(math.multiply(data.amount, 0.6)), 14))
+          } else {
+            this.$set(data, 'selfPaying', data.amount)
+          }
         })
         if (this.query.contract === '医保') {
           this.actual = _.reduce(this.tableData, function (total, data) {
-            return math.format(math.add(total, math.multiply(data.amount, 0.6)), 14)
+            return math.format(math.add(total, data.selfPaying), 14)
           }, 0)
         } else {
           this.actual = _.reduce(this.tableData, function (total, data) {
@@ -421,13 +426,13 @@ export default {
           })
           this.amount()
           this.searchMedicalRecord()
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'error',
-          message: h('h1', {style: 'color: teal'}, '收费失败。'),
-          showClose: false,
-          center: true
+        }).catch(() => {
+          this.$message({
+            type: 'error',
+            message: h('h1', {style: 'color: teal'}, '收费失败。'),
+            showClose: false,
+            center: true
+          })
         })
       })
     },
@@ -471,12 +476,9 @@ export default {
       this.printDialogShow = true
     },
     print () {
-      let printArea = document.getElementById('printContainer').innerHTML
-      // let orginArea = document.body.innerHTML
-      document.body.innerHTML = printArea
+      document.body.innerHTML = document.getElementById('printContainer').innerHTML
       window.print()
       window.location.reload()
-      // document.body.innerHTML = orginArea
       return false
     }
   }

@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <transition appear
-                appear-active-class="animated zoomIn"
-                name="custom-classes-transition" enter-active-class="animated zoomIn"
+                appear-active-class="animated zoomInUp"
+                name="custom-classes-transition" enter-active-class="animated zoomInUp"
                 mode="out-in">
       <router-view/>
     </transition>
